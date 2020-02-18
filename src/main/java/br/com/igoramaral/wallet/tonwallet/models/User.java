@@ -19,7 +19,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name="User")
+@Table(name="tb_user")
 public class User{
     @Id
     @GeneratedValue
