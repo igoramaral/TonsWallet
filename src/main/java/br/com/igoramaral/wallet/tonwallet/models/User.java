@@ -5,28 +5,29 @@
  */
 package br.com.igoramaral.wallet.tonwallet.models;
 
-import java.io.Serializable;
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
 
 /**
  *
  * @author IgorAmaral
  */
-@Entity
-@Table(name="tb_user")
+
 public class User{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    
     @Column
     private String name;
 
+    public User(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+    
     public User(String name) {
         this.name = name;
     }
@@ -47,4 +48,5 @@ public class User{
         this.name = name;
     }
     
+
 }
