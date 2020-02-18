@@ -9,11 +9,13 @@ import br.com.igoramaral.wallet.tonwallet.models.User;
 import br.com.igoramaral.wallet.tonwallet.repository.UserRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author IgorAmaral
  */
+@Service
 public class UserService {
     private final UserRepository userRepository;
 
