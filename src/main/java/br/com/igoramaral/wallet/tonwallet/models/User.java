@@ -22,7 +22,7 @@ import javax.persistence.Table;
 @Table(name="User")
 public class User{
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue
     private Long id;
     @Column
     private String name;
