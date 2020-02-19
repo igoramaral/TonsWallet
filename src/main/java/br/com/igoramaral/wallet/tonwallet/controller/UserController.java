@@ -36,15 +36,12 @@ public class UserController {
         return userService.getAllUsers();
     }
     
-    @GetMapping("/user/{id}")
+    @GetMapping("/users/{id}")
     //Return a single user given an id number
     public User getUser(@PathVariable(value="id") long id){
         return userService.getUser(id);
     }
     
-    @PostMapping("/user")
-    public User saveUser(@RequestBody User user){
-        User userToBeSaved = new User(user.getName());
-        return userService.saveUser(userToBeSaved);
-    }
+    
+    
 }

@@ -5,7 +5,7 @@
  */
 package br.com.igoramaral.wallet.tonwallet.repository;
 
-import br.com.igoramaral.wallet.tonwallet.models.User;
+import br.com.igoramaral.wallet.tonwallet.models.Wallet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,8 +14,6 @@ import org.springframework.stereotype.Repository;
  * @author IgorAmaral
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Long>{
-    
-    User findById(long id);
-    
+public interface WalletRepository extends JpaRepository<Wallet, Long>{
+    Wallet findById(long id);
 }

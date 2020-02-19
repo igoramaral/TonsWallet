@@ -22,11 +22,11 @@ import javax.persistence.Table;
 @Table(name="tb_user")
 public class User{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column
     private String name;
-
+    
     public User(){
         
     }

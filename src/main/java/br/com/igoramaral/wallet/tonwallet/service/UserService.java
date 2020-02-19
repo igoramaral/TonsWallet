@@ -34,6 +34,7 @@ public class UserService {
         return userRepository.findById(id);
     }
     
+    //Save a user on the database
     public User saveUser(User user){
         return userRepository.save(user);
     }

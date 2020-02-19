@@ -5,7 +5,8 @@
  */
 package br.com.igoramaral.wallet.tonwallet.repository;
 
-import br.com.igoramaral.wallet.tonwallet.models.User;
+import br.com.igoramaral.wallet.tonwallet.models.CreditCard;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,8 +15,7 @@ import org.springframework.stereotype.Repository;
  * @author IgorAmaral
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Long>{
-    
-    User findById(long id);
-    
+public interface CreditCardRepository extends JpaRepository<CreditCard, Long>{
+    List<CreditCard> findByWalletId(long id);
+    CreditCard findById(long id);
 }
