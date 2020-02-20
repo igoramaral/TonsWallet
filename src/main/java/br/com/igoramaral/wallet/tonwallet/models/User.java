@@ -5,11 +5,14 @@
  */
 package br.com.igoramaral.wallet.tonwallet.models;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 
@@ -27,17 +30,18 @@ public class User{
     @Column
     private String name;
     
+    //User has One to One relation to Wallet: A wallet belongs to a single user, an user has only one wallet
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "wallet_id", referencedColumnName= "id")
+    private Wallet wallet;
+    
     public User(){
         
     }
-    
-    public User(Long id, String name) {
-        this.id = id;
+        
+    public User(String name, Wallet wallet) {
         this.name = name;
-    }
-    
-    public User(String name) {
-        this.name = name;
+        this.wallet = wallet;
     }
 
     public Long getId() {
@@ -54,6 +58,14 @@ public class User{
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Wallet getWallet() {
+        return wallet;
+    }
+
+    public void setWallet(Wallet wallets) {
+        this.wallet = wallet;
     }
     
 

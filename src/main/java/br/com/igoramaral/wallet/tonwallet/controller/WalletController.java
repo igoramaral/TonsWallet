@@ -35,33 +35,16 @@ public class WalletController {
         this.walletService = walletService;
     }
     
-    @GetMapping("/wallets")
-    //Return all users from db
-    public List<Wallet> getAllWallets(){
-        return walletService.getAllWallets();
-    }
-    
-    @GetMapping("/wallets/{id}")
-    //Return a single user given an id number
-    public Wallet getWallet(@PathVariable(value="id") long id){
+    //This Controller has no post method because the wallet creation and deletion is handled on userController
+        
+    @GetMapping("/users/{user_id}/wallet")
+    //Return a wallet given an user id
+    public Wallet getWallet(@PathVariable(value="user_id") long id){
         return walletService.getWallet(id);
     }
     
-    @PostMapping("/wallets")
-    public Wallet saveWallet(@RequestBody User user){
-        User userToBeSaved = new User(user.getName());
-        Wallet walletToBeSaved = new Wallet(userToBeSaved);
-        return walletService.saveWallet(walletToBeSaved);
-    }
-    
-    @PutMapping("/wallets")
+    @PutMapping("/users/{user_id}/wallet")
     public Wallet updateUserLimit(@RequestBody Wallet wallet){
         return walletService.updateUserLimit(wallet);
-    }
-    
-    @DeleteMapping("/wallets")
-    public void deleteWallet(@RequestBody Wallet wallet){
-        //creditCardService.deleteAllCardsFromWallet(wallet.getId());
-        walletService.deleteWallet(wallet);
     }
 }

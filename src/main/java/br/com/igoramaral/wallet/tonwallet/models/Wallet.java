@@ -5,15 +5,15 @@
  */
 package br.com.igoramaral.wallet.tonwallet.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -31,27 +31,25 @@ public class Wallet {
     private Long id;
     
     private BigDecimal maxLimit;    //Sum of all Credit Cards Limits
-    private BigDecimal currLimit;   //Available Limit to be used in Wallet
+    private BigDecimal availableLimit;   //Available Limit to be used in Wallet
     private BigDecimal userLimit;   //User defined Limit. Cannot be higher than maxLimit
     
-    //Wallet has One to One relation to User: A wallet belongs to a single user, an user has only one wallet
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", referencedColumnName= "id")
+    @OneToOne(mappedBy="wallet")
+    @JsonIgnore
     private User user;
-    
     //Wallet has One to Many relation to Credit Cards: A card belongs to a single wallet, a wallet has many cards
-    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CreditCard> cards;
+    
+    @OneToMany(mappedBy = "wallet", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<CreditCard> cards;
 
     public Wallet() {
+        
     }
 
-    public Wallet(User user) {
-        this.maxLimit = new BigDecimal("0.00");
-        this.currLimit = new BigDecimal("0.00");
-        this.userLimit = new BigDecimal("0.00");
-        this.user = user;
-        this.cards = new ArrayList<>();
+    public Wallet(String limit, String availableLimit, String userLimit) {
+        this.maxLimit = new BigDecimal(limit);
+        this.availableLimit = new BigDecimal(availableLimit);
+        this.userLimit = new BigDecimal(userLimit);
     }
 
     public Long getId() {
@@ -70,12 +68,12 @@ public class Wallet {
         this.maxLimit = maxLimit;
     }
 
-    public BigDecimal getCurrLimit() {
-        return currLimit;
+    public BigDecimal getAvailableLimit() {
+        return availableLimit;
     }
 
-    public void setCurrLimit(BigDecimal currLimit) {
-        this.currLimit = currLimit;
+    public void setAvailableLimit(BigDecimal availableLimit) {
+        this.availableLimit = availableLimit;
     }
 
     public BigDecimal getUserLimit() {
@@ -94,11 +92,14 @@ public class Wallet {
         this.user = user;
     }
 
-    public void addCard(CreditCard card) {
-        cards.add(card);
+    public Set<CreditCard> getCards() {
+        return this.cards;
     }
 
-    public void removeCard(CreditCard card) {
-        cards.remove(card);
-    }    
+    public void setCards(Set<CreditCard> cards) {
+        this.cards = cards;
+    }
+    
+    
+    
 }

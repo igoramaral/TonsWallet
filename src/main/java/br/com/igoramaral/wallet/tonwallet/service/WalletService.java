@@ -34,7 +34,7 @@ public class WalletService {
     }
     
     public Wallet getWallet(long id){
-        return walletRepository.findById(id);
+        return walletRepository.findByUserId(id);
     }
     
     public Wallet saveWallet(Wallet wallet) {

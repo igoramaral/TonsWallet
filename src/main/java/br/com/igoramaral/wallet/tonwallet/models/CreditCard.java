@@ -5,10 +5,12 @@
  */
 package br.com.igoramaral.wallet.tonwallet.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -37,8 +39,9 @@ public class CreditCard {
     private int paymentDay;
     private LocalDate expirationDate;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id")
+    @JsonIgnore
     private Wallet wallet;
 
     public CreditCard() {
@@ -56,7 +59,6 @@ public class CreditCard {
         this.availableLimit = new BigDecimal(availableLimit);
         this.paymentDay = paymentDay;
         this.expirationDate = expiration;
-        this.wallet = null;
     }
 
     public Long getId() {

@@ -6,6 +6,7 @@
 package br.com.igoramaral.wallet.tonwallet.controller;
 
 import br.com.igoramaral.wallet.tonwallet.models.User;
+import br.com.igoramaral.wallet.tonwallet.models.Wallet;
 import br.com.igoramaral.wallet.tonwallet.service.UserService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class UserController {
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
-    }
+}
     
     @GetMapping("/users")
     //Return all users from db
@@ -40,6 +41,12 @@ public class UserController {
     //Return a single user given an id number
     public User getUser(@PathVariable(value="id") long id){
         return userService.getUser(id);
+    }
+    
+    @PostMapping("/users")
+    public User addUser(@RequestBody User user){
+        User userToBeSaved = new User(user.getName(), new Wallet("0.00","0.00","0.00")); 
+        return userService.saveUser(userToBeSaved);
     }
     
     

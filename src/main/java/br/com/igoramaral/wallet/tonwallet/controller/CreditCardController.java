@@ -12,9 +12,11 @@ import br.com.igoramaral.wallet.tonwallet.service.WalletService;
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,28 +36,35 @@ public class CreditCardController {
         this.walletService = walletService;
     }
     
-    @GetMapping("/wallets/{wallet_id}/creditcards")
+    @GetMapping("/users/{user_id}/wallet/creditcards")
     //Return all credit cards from a given wallet from db
-    public List<CreditCard> getAllCreditCardsFromWallet(@PathVariable(value="wallet_id") long wallet_id){
+    public List<CreditCard> getAllCreditCardsFromWallet(@PathVariable(value="user_id") long user_id){
+        long wallet_id = walletService.getWallet(user_id).getId();  //get walet_id from user_id
         return creditCardService.getAllCreditCardsFromWallet(wallet_id);
     }
     
-    @GetMapping("/wallets/{wallet_id}/creditcards/{id}")
+    @GetMapping("/users/{user_id}/wallet/creditcards/{id}")
     //Return a single user given an id number
     public CreditCard getCreditCard(@PathVariable(value="id") long id){
         return creditCardService.getCreditCard(id);
     }
     
-    @PostMapping("/wallets/{wallet_id}/creditcards")
-    public CreditCard saveCreditCard(@PathVariable(value="wallet_id") long wallet_id, @RequestBody CreditCard creditCard){
-        Wallet wallet = walletService.getWallet(wallet_id); //get wallet from id
-        BigDecimal newLimit = creditCard.getMaxLimit(); //get credit card limit value
-        wallet.setMaxLimit(wallet.getMaxLimit().add(newLimit)); //adds credit card limit to wallet limit
-        wallet.addCard(creditCard);
-        walletService.updateMaxLimit(wallet);   //updates wallet information
-        creditCard.setWallet(wallet);
-        return creditCardService.saveCreditCard(creditCard);    //saves credit card
-        
+    @PostMapping("/users/{user_id}/wallet/creditcards")
+    public CreditCard insertCreditCard(@PathVariable(value="user_id") long user_id, @RequestBody CreditCard creditCard){
+        long wallet_id = walletService.getWallet(user_id).getId(); //get wallet from user_id
+        return creditCardService.saveCreditCardUpdatingLimit(wallet_id, creditCard);        
+    }
+    
+    @PutMapping("/users/{user_id}/wallet/creditcards")
+    public CreditCard updateCreditCardInfo(@PathVariable(value="user_id") long user_id, @RequestBody CreditCard creditCard){
+        long wallet_id = walletService.getWallet(user_id).getId(); //get wallet from user_id
+        return creditCardService.updateCreditCardInfo(wallet_id, creditCard);
+    }
+    
+    @DeleteMapping("/users/{user_id}/wallet/creditcards")
+    public void deleteCreditCard(@PathVariable(value="user_id") long user_id, @RequestBody CreditCard creditCard){
+        long wallet_id = walletService.getWallet(user_id).getId();
+        creditCardService.deleteCreditCard(wallet_id, creditCard);
     }
     
 }
