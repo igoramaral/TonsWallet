@@ -17,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  *
@@ -43,6 +44,10 @@ public class CreditCard {
     @JoinColumn(name = "wallet_id")
     @JsonIgnore
     private Wallet wallet;
+    
+    @JsonIgnore
+    @Transient
+    private LocalDate paymentDate;
 
     public CreditCard() {
     }
@@ -140,7 +145,13 @@ public class CreditCard {
     public void setWallet(Wallet wallet) {
         this.wallet = wallet;
     }
-    
-    
+
+    public LocalDate getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDate paymentDate) {
+        this.paymentDate = paymentDate;
+    }
     
 }

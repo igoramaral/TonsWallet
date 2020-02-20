@@ -5,13 +5,11 @@
  */
 package br.com.igoramaral.wallet.tonwallet.controller;
 
-import br.com.igoramaral.wallet.tonwallet.models.User;
+import br.com.igoramaral.wallet.tonwallet.models.ValueDTO;
 import br.com.igoramaral.wallet.tonwallet.models.Wallet;
 import br.com.igoramaral.wallet.tonwallet.service.CreditCardService;
 import br.com.igoramaral.wallet.tonwallet.service.WalletService;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,9 +32,7 @@ public class WalletController {
         this.creditCardService = creditCardService;
         this.walletService = walletService;
     }
-    
-    //This Controller has no post method because the wallet creation and deletion is handled on userController
-        
+            
     @GetMapping("/users/{user_id}/wallet")
     //Return a wallet given an user id
     public Wallet getWallet(@PathVariable(value="user_id") long id){
@@ -46,5 +42,10 @@ public class WalletController {
     @PutMapping("/users/{user_id}/wallet")
     public Wallet updateUserLimit(@RequestBody Wallet wallet){
         return walletService.updateUserLimit(wallet);
+    }
+    
+    @PostMapping("/users/{user_id}/wallet/payment")
+    public Wallet makePayment(@PathVariable(value="user_id") long user_id, @RequestBody ValueDTO value){
+        return walletService.makePayment(user_id, value.getValue());
     }
 }
