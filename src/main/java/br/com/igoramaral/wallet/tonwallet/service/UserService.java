@@ -8,6 +8,8 @@ package br.com.igoramaral.wallet.tonwallet.service;
 import br.com.igoramaral.wallet.tonwallet.models.User;
 import br.com.igoramaral.wallet.tonwallet.repository.UserRepository;
 import java.util.List;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,5 +39,20 @@ public class UserService {
     //Save a user on the database
     public User saveUser(User user){
         return userRepository.save(user);
+    }
+    
+    //Updates a user
+    public User updateUserInfo(long id, User updatedUser){
+        User user = userRepository.findById(id);
+        PersistenceUtil util = Persistence.getPersistenceUtil();
+        if(util.isLoaded(user)){
+            user.setName(updatedUser.getName());
+            return userRepository.save(user);
+        } else return null;
+    }
+    
+    //Deletes a user (and respective data) from the database
+    public void deleteUser(long id){
+        userRepository.deleteById(id);
     }
 }

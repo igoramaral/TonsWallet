@@ -29,23 +29,27 @@ public class WalletService {
         this.creditCardRepository = creditCardRepository;
     }
     
+    //Returns all wallets from database
     public List<Wallet> getAllWallets(){
         return walletRepository.findAll();
     }
     
+    //get a single wallet based on UserId
     public Wallet getWallet(long id){
         return walletRepository.findByUserId(id);
     }
     
+    //Saves a wallet on the database
     public Wallet saveWallet(Wallet wallet) {
         return walletRepository.save(wallet);
     }
     
+    //saves a wallet without returning an Wallet object
     public void updateMaxLimit(Wallet wallet){
         walletRepository.save(wallet);
     }
     
-    //updates User defined Limit
+    //updates the user defined Limit on the wallet
     public Wallet updateUserLimit(Wallet wallet){
         BigDecimal userLimit = wallet.getUserLimit();
         BigDecimal maxLimit = wallet.getMaxLimit();
@@ -56,6 +60,7 @@ public class WalletService {
         }
     }
     
+    //delete a wallet from database
     public void deleteWallet(Wallet wallet){
         walletRepository.deleteById(wallet.getId());
     }
