@@ -6,10 +6,9 @@
 package br.com.igoramaral.wallet.tonwallet.controller;
 
 import br.com.igoramaral.wallet.tonwallet.models.CreditCard;
-import br.com.igoramaral.wallet.tonwallet.models.Wallet;
+import br.com.igoramaral.wallet.tonwallet.models.ValueDTO;
 import br.com.igoramaral.wallet.tonwallet.service.CreditCardService;
 import br.com.igoramaral.wallet.tonwallet.service.WalletService;
-import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,12 +42,6 @@ public class CreditCardController {
         return creditCardService.getAllCreditCardsFromWallet(wallet_id);
     }
     
-    @GetMapping("/users/{user_id}/wallet/creditcards/{id}")
-    //Return a single user given an id number
-    public CreditCard getCreditCard(@PathVariable(value="id") long id){
-        return creditCardService.getCreditCard(id);
-    }
-    
     @PostMapping("/users/{user_id}/wallet/creditcards")
     public CreditCard insertCreditCard(@PathVariable(value="user_id") long user_id, @RequestBody CreditCard creditCard){
         long wallet_id = walletService.getWallet(user_id).getId(); //get wallet from user_id
@@ -66,5 +59,21 @@ public class CreditCardController {
         long wallet_id = walletService.getWallet(user_id).getId();
         creditCardService.deleteCreditCard(wallet_id, creditCard);
     }
+    
+    @GetMapping("/users/{user_id}/wallet/creditcards/{card_id}")
+    //Return a single user given an id number
+    public CreditCard getCreditCard(@PathVariable(value="card_id") long card_id){
+        return creditCardService.getCreditCard(card_id);
+    }
+    
+    @PostMapping("/users/{user_id}/wallet/creditcards/{card_id}")
+    //Return a single user given an id number
+    public CreditCard makePaymentOnCard(@PathVariable(value="user_id") long user_id, @PathVariable(value="card_id") long card_id, @RequestBody ValueDTO value){
+        System.out.println("user: " + user_id + ", card: " + card_id + ", value: " + value.getValue());
+        long wallet_id = walletService.getWallet(user_id).getId();
+        return creditCardService.makePayment(wallet_id, card_id, value.getValue());
+    }
+    
+    
     
 }

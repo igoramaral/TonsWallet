@@ -11,7 +11,7 @@ import br.com.igoramaral.wallet.tonwallet.repository.CreditCardRepository;
 import br.com.igoramaral.wallet.tonwallet.repository.WalletRepository;
 import java.math.BigDecimal;
 import java.util.List;
-import javassist.NotFoundException;
+import java.util.Optional;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,8 @@ public class CreditCardService {
         if(util.isLoaded(wallet)){
             creditCard.setWallet(wallet);
             BigDecimal newLimit = creditCard.getMaxLimit();
-            wallet.setMaxLimit(wallet.getMaxLimit().add(newLimit));
+            wallet.setMaxLimit(wallet.getMaxLimit().add(newLimit)); //add credit card limit to the wallet max limit
+            wallet.setAvailableLimit(wallet.getAvailableLimit().add(creditCard.getAvailableLimit())); //add credit card available limit to the wallet available limit
             return creditCardRepository.save(creditCard);
         } else return null;
     }
@@ -95,5 +96,31 @@ public class CreditCardService {
         }
     }
     
- 
+    public CreditCard makePayment(long wallet_id, long card_id, String value){
+        CreditCard card = creditCardRepository.findById(card_id);
+        Wallet wallet = walletRepository.findById(wallet_id);
+        PersistenceUtil util = Persistence.getPersistenceUtil();
+        if(util.isLoaded(card) && util.isLoaded(wallet)){
+            //check if available limit is equal to max card limit
+            if (card.getAvailableLimit().compareTo(card.getMaxLimit()) == 0){
+                //if the limits are equal, there's no need to update available limit since its alredy the maximum
+                //throw new ;
+                return null;
+            } else {
+                BigDecimal maxPaymentValue = card.getMaxLimit().subtract(card.getAvailableLimit()); //cannot make a payment that will make availableLimit higher than maxLimit
+                BigDecimal paymentValue = new BigDecimal(value);
+                if(paymentValue.compareTo(maxPaymentValue) <= 0){
+                    //if the paymentValue is smaller or equal to maxPaymentValue, add it directly to the card and wallet limits
+                    card.setAvailableLimit(card.getAvailableLimit().add(paymentValue)); //adds payment value to the card available limit
+                    wallet.setAvailableLimit(wallet.getAvailableLimit().add(paymentValue)); //adds payment value to the wallet available limit
+                    card.setWallet(wallet);
+                    return creditCardRepository.save(card);
+                } else {
+                    //if paymentValue is bigger than maxPaymentValue, add maxPaymentValue to the limit
+                }
+            }
+        }
+        return null;
+    }
+    
 }
