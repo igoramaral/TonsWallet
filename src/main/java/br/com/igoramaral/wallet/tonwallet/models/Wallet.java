@@ -6,6 +6,7 @@
 package br.com.igoramaral.wallet.tonwallet.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -26,19 +27,25 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "tb_wallet")
 public class Wallet {
+    @ApiModelProperty(hidden = true)
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     
+    @ApiModelProperty(value = "In a currency format. E.g. 0.00")
     private BigDecimal maxLimit;    //Sum of all Credit Cards Limits
+    @ApiModelProperty(value = "In a currency format. E.g. 0.00")
     private BigDecimal availableLimit;   //Available Limit to be used in Wallet
+    @ApiModelProperty(value = "In a currency format. E.g. 0.00")
     private BigDecimal userLimit;   //User defined Limit. Cannot be higher than maxLimit
     
+    @ApiModelProperty(hidden = true)
     @OneToOne(mappedBy="wallet")
     @JsonIgnore
     private User user;
     //Wallet has One to Many relation to Credit Cards: A card belongs to a single wallet, a wallet has many cards
     
+    @ApiModelProperty(hidden = true)
     @OneToMany(mappedBy = "wallet", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<CreditCard> cards;
 

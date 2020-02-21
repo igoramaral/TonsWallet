@@ -5,6 +5,7 @@
  */
 package br.com.igoramaral.wallet.tonwallet.models;
 
+import io.swagger.annotations.ApiModelProperty;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,6 +32,7 @@ public class User{
     private String name;
     
     //User has One to One relation to Wallet: A wallet belongs to a single user, an user has only one wallet
+    @ApiModelProperty(hidden = true)
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "wallet_id", referencedColumnName= "id")
     private Wallet wallet;

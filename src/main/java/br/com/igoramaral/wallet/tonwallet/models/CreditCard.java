@@ -6,11 +6,9 @@
 package br.com.igoramaral.wallet.tonwallet.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -42,11 +40,13 @@ public class CreditCard {
     private int paymentDay;
     private LocalDate expirationDate;
     
+    @ApiModelProperty(hidden = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id")
     @JsonIgnore
     private Wallet wallet;
     
+    @ApiModelProperty(hidden = true)
     @JsonIgnore
     @Transient
     private LocalDate paymentDate;

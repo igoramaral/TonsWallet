@@ -144,7 +144,6 @@ public class WalletService {
                             CreditCard card = walletCards.get(i);
                             card.setAvailableLimit(new BigDecimal("0.00"));
                             paymentValue = paymentValue.subtract(cardLimit);
-                            System.out.println("current payment value: " + paymentValue);
                             card.setWallet(wallet);
                             creditCardRepository.save(card);
                             i ++;
@@ -154,7 +153,6 @@ public class WalletService {
                             CreditCard card = walletCards.get(i);
                             card.setAvailableLimit(card.getAvailableLimit().subtract(paymentValue));
                             paymentValue = paymentValue.subtract(paymentValue);
-                            System.out.println("current payment value: " + paymentValue);
                             card.setWallet(wallet);
                             creditCardRepository.save(card);
                             break;

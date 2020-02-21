@@ -46,25 +46,29 @@ public class CreditCardService {
     }
     
     public CreditCard saveCreditCard(CreditCard creditCard) {
-        return creditCardRepository.save(creditCard);
-    }
+        if(validateCreditCardInfo(creditCard)){
+            return creditCardRepository.save(creditCard);
+        }else throw new WrongRequestAttributeException("Cannot add this card to wallet");
+    } 
     
     public CreditCard saveCreditCardUpdatingLimit(long wallet_id, CreditCard creditCard){
         
         Wallet wallet = walletRepository.findById(wallet_id);
         if(wallet != null){
-            creditCard.setWallet(wallet);
-            BigDecimal newLimit = creditCard.getMaxLimit();
-            wallet.setMaxLimit(wallet.getMaxLimit().add(newLimit)); //add credit card limit to the wallet max limit
-            //if actual walletAvailableLimit + cardAvailableLimit > walletUserLimit, walletAvailableLimit = walletUserLimit
-            //else, walletAvailableLimit += cardAvailableLimit
-            if(wallet.getAvailableLimit().add(creditCard.getAvailableLimit()).compareTo(wallet.getUserLimit()) == 1){
-                wallet.setAvailableLimit(wallet.getUserLimit());
-            }
-            else {
-                wallet.setAvailableLimit(wallet.getAvailableLimit().add(creditCard.getAvailableLimit())); 
-            }
-            return creditCardRepository.save(creditCard);
+            if(validateCreditCardInfo(creditCard)){
+                creditCard.setWallet(wallet);
+                BigDecimal newLimit = creditCard.getMaxLimit();
+                wallet.setMaxLimit(wallet.getMaxLimit().add(newLimit)); //add credit card limit to the wallet max limit
+                //if actual walletAvailableLimit + cardAvailableLimit > walletUserLimit, walletAvailableLimit = walletUserLimit
+                //else, walletAvailableLimit += cardAvailableLimit
+                if(wallet.getAvailableLimit().add(creditCard.getAvailableLimit()).compareTo(wallet.getUserLimit()) == 1){
+                    wallet.setAvailableLimit(wallet.getUserLimit());
+                }
+                else {
+                    wallet.setAvailableLimit(wallet.getAvailableLimit().add(creditCard.getAvailableLimit())); 
+                }
+                return creditCardRepository.save(creditCard);
+            }else throw new WrongRequestAttributeException("Cannot add this card to wallet");
         } else throw new UserNotFoundException("Wallet not found for wallet_id=" + wallet_id);
     }
     
@@ -73,27 +77,27 @@ public class CreditCardService {
         if(wallet != null){
             CreditCard oldCardInfo = getCreditCard(creditCard.getId());
             if (oldCardInfo.getAvailableLimit().compareTo(creditCard.getAvailableLimit()) == 0){
-                int comparison = oldCardInfo.getMaxLimit().compareTo(creditCard.getMaxLimit());
-                if(comparison == 0){
-                    //If the card limit hasn't changed, just save the card info
-                    creditCard.setWallet(wallet);
-                    return creditCardRepository.save(creditCard);
-                } else if (comparison == -1) {
-                    //if the old card limit is lesser than the new card limit, add the difference to the wallet limit
-                    BigDecimal limitDifference = creditCard.getMaxLimit().subtract(oldCardInfo.getMaxLimit());
-                    wallet.setMaxLimit(wallet.getMaxLimit().add(limitDifference)); //adds credit card limit to wallet limit
-                    creditCard.setWallet(wallet);
-                    return creditCardRepository.save(creditCard);
-                } else {
-                    //if the old card limit is more than the new card limit, subtract the difference from the wallet limit
-                    BigDecimal limitDifference = oldCardInfo.getMaxLimit().subtract(creditCard.getMaxLimit());
-                    wallet.setMaxLimit(wallet.getMaxLimit().subtract(limitDifference)); //adds credit card limit to wallet limit
-                    creditCard.setWallet(wallet);
-                    return creditCardRepository.save(creditCard);
-                }
-            }else {
-                throw new WrongRequestAttributeException("Cannot update credit card with different Available Limit value. Use payment function to update Available Limit.");
-            }
+                if(validateCreditCardInfo(creditCard)){
+                    int comparison = oldCardInfo.getMaxLimit().compareTo(creditCard.getMaxLimit());
+                    if(comparison == 0){
+                        //If the card limit hasn't changed, just save the card info
+                        creditCard.setWallet(wallet);
+                        return creditCardRepository.save(creditCard);                    
+                    } else if (comparison == -1) {
+                        //if the old card limit is lesser than the new card limit, add the difference to the wallet limit
+                        BigDecimal limitDifference = creditCard.getMaxLimit().subtract(oldCardInfo.getMaxLimit());
+                        wallet.setMaxLimit(wallet.getMaxLimit().add(limitDifference)); //adds credit card limit to wallet limit
+                        creditCard.setWallet(wallet);
+                        return creditCardRepository.save(creditCard);
+                    } else {
+                        //if the old card limit is greater than the new card limit, subtract the difference from the wallet limit
+                        BigDecimal limitDifference = oldCardInfo.getMaxLimit().subtract(creditCard.getMaxLimit());
+                        wallet.setMaxLimit(wallet.getMaxLimit().subtract(limitDifference)); //adds credit card limit to wallet limit
+                        creditCard.setWallet(wallet);
+                        return creditCardRepository.save(creditCard);
+                    }
+                }else throw new WrongRequestAttributeException("Could not validate credit card information. Please insert valid information.");
+            }else throw new WrongRequestAttributeException("Cannot update credit card with different Available Limit value. Use payment function to update Available Limit.");
         } else throw new UserNotFoundException("Wallet not found for wallet_id=" + wallet_id);
     }
     
@@ -101,8 +105,8 @@ public class CreditCardService {
         Wallet wallet = walletRepository.findById(wallet_id);
         if(wallet != null){
             creditCard.setWallet(wallet);
-            BigDecimal newLimit = creditCard.getMaxLimit();
-            wallet.setMaxLimit(wallet.getMaxLimit().subtract(newLimit));
+            BigDecimal newMaxLimit = creditCard.getMaxLimit();
+            wallet.setMaxLimit(wallet.getMaxLimit().subtract(newMaxLimit));
             creditCardRepository.delete(creditCard);
         }else throw new UserNotFoundException("Wallet not found for wallet_id=" + wallet_id);
     }
@@ -140,6 +144,23 @@ public class CreditCardService {
                 }
             }else throw new UserNotFoundException("Wallet not found for wallet_id=" + wallet_id);
         } else throw new UserNotFoundException("Credit Card not found for card_id=" + card_id);
+    }
+    
+    public boolean validateCreditCardInfo(CreditCard card){
+        int day = card.getPaymentDay();
+        String number = card.getCardNumber();
+        String cvv = card.getCvv();
+        BigDecimal limit = card.getMaxLimit();
+        BigDecimal available = card.getAvailableLimit();
+        if(number.matches("[0-9]+") && number.length()==16){
+            if (cvv.matches("[0-9]+") && cvv.length()==3) {
+                if (available.compareTo(limit) != 1){
+                    if ((1 <= day) && (day <= 31)){
+                        return true;
+                    }else throw new WrongRequestAttributeException("paymentDay must be between 1 and 31");      
+                }else throw new WrongRequestAttributeException("available limit cannot be greater than credit card's limit");
+            }else throw new WrongRequestAttributeException("wrong cvv code");
+        }else throw new WrongRequestAttributeException("wrong card number");
     }
     
 }
