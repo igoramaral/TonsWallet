@@ -54,18 +54,7 @@ public class CreditCard {
     public CreditCard() {
     }
 
-    public CreditCard(@JsonProperty("cardName") String cardName, 
-            @JsonProperty("cardNumber") String cardNumber, 
-            @JsonProperty("holderName") String holderName, 
-            @JsonProperty("cvv") String cvv, 
-            @JsonProperty("maxLimit") String limit, 
-            @JsonProperty("availableLimit") String availableLimit, 
-            @JsonProperty("paymentDay") int paymentDay, 
-            @JsonProperty("expirationDate") String expirationDate) {
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("MM/yyyy");
-        YearMonth date = YearMonth.parse(expirationDate, format);
-        LocalDate expiration = date.atEndOfMonth();
-        
+    public CreditCard(String cardName, String cardNumber, String holderName, String cvv, String limit, String availableLimit, int paymentDay, LocalDate expirationDate) {        
         this.cardName = cardName;
         this.cardNumber = cardNumber;
         this.holderName = holderName;
@@ -73,9 +62,9 @@ public class CreditCard {
         this.maxLimit = new BigDecimal(limit);
         this.availableLimit = new BigDecimal(availableLimit);
         this.paymentDay = paymentDay;
-        this.expirationDate = expiration;
-    }
-
+        this.expirationDate = expirationDate;
+    } 
+    
     public Long getId() {
         return id;
     }

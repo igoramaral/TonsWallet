@@ -72,7 +72,7 @@ public class CreditCardService {
         Wallet wallet = walletRepository.findById(wallet_id);
         if(wallet != null){
             CreditCard oldCardInfo = getCreditCard(creditCard.getId());
-            if (oldCardInfo.getAvailableLimit().compareTo(creditCard.getAvailableLimit()) != 0){
+            if (oldCardInfo.getAvailableLimit().compareTo(creditCard.getAvailableLimit()) == 0){
                 int comparison = oldCardInfo.getMaxLimit().compareTo(creditCard.getMaxLimit());
                 if(comparison == 0){
                     //If the card limit hasn't changed, just save the card info
@@ -91,7 +91,9 @@ public class CreditCardService {
                     creditCard.setWallet(wallet);
                     return creditCardRepository.save(creditCard);
                 }
-            } throw new WrongRequestAttributeException("Cannot update credit card with different Available Limit value. Use payment function to update Available Limit.");
+            }else {
+                throw new WrongRequestAttributeException("Cannot update credit card with different Available Limit value. Use payment function to update Available Limit.");
+            }
         } else throw new UserNotFoundException("Wallet not found for wallet_id=" + wallet_id);
     }
     

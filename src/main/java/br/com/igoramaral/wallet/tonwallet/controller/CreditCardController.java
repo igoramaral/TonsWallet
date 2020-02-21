@@ -61,15 +61,14 @@ public class CreditCardController {
     }
     
     @GetMapping("/users/{user_id}/wallet/creditcards/{card_id}")
-    //Return a single user given an id number
+    //Return a single credit card given an id number
     public CreditCard getCreditCard(@PathVariable(value="card_id") long card_id){
         return creditCardService.getCreditCard(card_id);
     }
     
     @PostMapping("/users/{user_id}/wallet/creditcards/{card_id}")
-    //Return a single user given an id number
+    //Return a single card after making a payment to raise available limit given an user_id to find a wallet and card_id number to find a card
     public CreditCard makePaymentOnCard(@PathVariable(value="user_id") long user_id, @PathVariable(value="card_id") long card_id, @RequestBody ValueDTO value){
-        System.out.println("user: " + user_id + ", card: " + card_id + ", value: " + value.getValue());
         long wallet_id = walletService.getWallet(user_id).getId();
         return creditCardService.makePayment(wallet_id, card_id, value.getValue());
     }
