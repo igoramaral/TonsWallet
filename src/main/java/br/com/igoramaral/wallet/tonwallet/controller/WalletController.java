@@ -40,8 +40,8 @@ public class WalletController {
     }
     
     @PutMapping("/users/{user_id}/wallet")
-    public Wallet updateUserLimit(@RequestBody Wallet wallet){
-        return walletService.updateUserLimit(wallet);
+    public Wallet updateUserLimit(@PathVariable(value="user_id") long user_id, @RequestBody ValueDTO value){
+        return walletService.updateUserLimit(user_id, value.getValue());
     }
     
     @PostMapping("/users/{user_id}/wallet/payment")

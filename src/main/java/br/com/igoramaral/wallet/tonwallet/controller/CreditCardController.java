@@ -74,6 +74,4 @@ public class CreditCardController {
         return creditCardService.makePayment(wallet_id, card_id, value.getValue());
     }
     
-    
-    
 }

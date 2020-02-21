@@ -5,6 +5,8 @@
  */
 package br.com.igoramaral.wallet.tonwallet.service;
 
+import br.com.igoramaral.wallet.tonwallet.exceptions.UserNotFoundException;
+import br.com.igoramaral.wallet.tonwallet.exceptions.WrongRequestAttributeException;
 import br.com.igoramaral.wallet.tonwallet.models.CreditCard;
 import br.com.igoramaral.wallet.tonwallet.models.Wallet;
 import br.com.igoramaral.wallet.tonwallet.repository.CreditCardRepository;
@@ -14,8 +16,6 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +42,10 @@ public class WalletService {
     
     //get a single wallet based on UserId
     public Wallet getWallet(long id){
-        return walletRepository.findByUserId(id);
+        Wallet wallet = walletRepository.findByUserId(id);
+        if (wallet != null){
+            return wallet;
+        } else throw new UserNotFoundException("Wallet not found for user_id=" + id);
     }
     
     //Saves a wallet on the database
@@ -56,14 +59,32 @@ public class WalletService {
     }
     
     //updates the user defined Limit on the wallet
-    public Wallet updateUserLimit(Wallet wallet){
-        BigDecimal userLimit = wallet.getUserLimit();
-        BigDecimal maxLimit = wallet.getMaxLimit();
-        if(userLimit.compareTo(maxLimit) == 1){
-            return null;
-        } else {
+    public Wallet updateUserLimit(long user_id, String value){
+        Wallet oldWalletInfo = walletRepository.findByUserId(user_id);
+        if (oldWalletInfo != null){
+            Wallet wallet = oldWalletInfo;
+            BigDecimal userLimit = new BigDecimal(value);
+            //UserLimit cannot be bigger than wallet's maxLimit
+            if(userLimit.compareTo(oldWalletInfo.getMaxLimit()) == 1){
+                throw new WrongRequestAttributeException("UserLimit cannot be greater than Wallet's MaxLimit");
+            } else {
+                wallet.setUserLimit(userLimit);
+                //get the Sum of all cards available limit. This is the max availableLimit
+                List<CreditCard> walletCards = creditCardRepository.findByWalletId(wallet.getId());
+                BigDecimal totalCardLimits = new BigDecimal("0.00");
+                for (int i = 0; i < walletCards.size(); i++){
+                    totalCardLimits = totalCardLimits.add(walletCards.get(i).getAvailableLimit());
+                }
+                if(totalCardLimits.compareTo(userLimit) <= 0) {
+                    //if max availableLimit is smaller or equal to new userLimit, new availableLimit is equal to max availableLimit
+                    wallet.setAvailableLimit(totalCardLimits);
+                } else {
+                    //else, new availableLimit is equal to the userLimit
+                    wallet.setAvailableLimit(userLimit);
+                }
+            }
             return walletRepository.save(wallet);
-        }
+        }else throw new UserNotFoundException("Wallet not found for user_id=" + user_id);
     }
     
     //delete a wallet from database
@@ -74,15 +95,13 @@ public class WalletService {
     //makes a payment on the wallet based on credit cards and available limit
     public Wallet makePayment(long user_id, String value){
         Wallet wallet = walletRepository.findByUserId(user_id);
-        PersistenceUtil util = Persistence.getPersistenceUtil();
-        if(util.isLoaded(wallet)){
+        if(wallet != null){
             BigDecimal availableLimit = wallet.getAvailableLimit();
             BigDecimal paymentValue = new BigDecimal(value);
             //checks if paymentValue is less or equal to the wallet's availableLimit
             if(paymentValue.compareTo(availableLimit) <= 0){
                 wallet.setAvailableLimit(wallet.getAvailableLimit().subtract(paymentValue));
                 List<CreditCard> walletCards = creditCardRepository.findByWalletId(wallet.getId());
-                
                 //sort the list based on the wallet's payment criteria:
                 //1) make payment first on the most distant payment date
                 //2) if the dates are equal, make payment first on the card with thelowest available limit
@@ -112,7 +131,6 @@ public class WalletService {
                         }
                     }
                 });
-                
                 //the list is now sorted. we may proceed to make payment on each card
                 int i = 0;
                 while (paymentValue.compareTo(new BigDecimal("0.00")) != 0){
@@ -132,6 +150,7 @@ public class WalletService {
                             i ++;
                         }
                         else {
+                            //if the cardLimit is greater than the payment value, make the payment entirely on this card
                             CreditCard card = walletCards.get(i);
                             card.setAvailableLimit(card.getAvailableLimit().subtract(paymentValue));
                             paymentValue = paymentValue.subtract(paymentValue);
@@ -143,8 +162,8 @@ public class WalletService {
                     }  
                 }
                 return walletRepository.save(wallet);
-            } else return null;
-        } else return null;
+            } else throw new WrongRequestAttributeException("Payment Value cannot be Bigger than Wallet's Available Limit");
+        } else throw new UserNotFoundException("Wallet not found for user_id=" + user_id);
     }
     
 }
