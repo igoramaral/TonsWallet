@@ -107,6 +107,20 @@ public class CreditCardService {
             creditCard.setWallet(wallet);
             BigDecimal newMaxLimit = creditCard.getMaxLimit();
             wallet.setMaxLimit(wallet.getMaxLimit().subtract(newMaxLimit));
+            List<CreditCard> walletCards = creditCardRepository.findByWalletId(wallet.getId());
+            BigDecimal totalCardLimits = new BigDecimal("0.00");
+            BigDecimal userLimit = wallet.getUserLimit();
+            for (int i = 0; i < walletCards.size(); i++){
+                totalCardLimits = totalCardLimits.add(walletCards.get(i).getAvailableLimit());
+            }
+            totalCardLimits = totalCardLimits.subtract(creditCard.getAvailableLimit());
+            if(totalCardLimits.compareTo(userLimit) <= 0) {
+                //if max availableLimit is smaller or equal to new userLimit, new availableLimit is equal to max availableLimit
+                wallet.setAvailableLimit(totalCardLimits);
+            } else {
+                //else, new availableLimit is equal to the userLimit
+                wallet.setAvailableLimit(userLimit);
+            }
             creditCardRepository.delete(creditCard);
         }else throw new UserNotFoundException("Wallet not found for wallet_id=" + wallet_id);
     }
