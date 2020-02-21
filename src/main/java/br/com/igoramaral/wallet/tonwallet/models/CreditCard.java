@@ -6,9 +6,11 @@
 package br.com.igoramaral.wallet.tonwallet.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -52,8 +54,16 @@ public class CreditCard {
     public CreditCard() {
     }
 
-    public CreditCard(String cardName, String cardNumber, String holderName, String cvv, String limit, String availableLimit, int paymentDay, String expirationDate) {
-        YearMonth date = YearMonth.parse(expirationDate);
+    public CreditCard(@JsonProperty("cardName") String cardName, 
+            @JsonProperty("cardNumber") String cardNumber, 
+            @JsonProperty("holderName") String holderName, 
+            @JsonProperty("cvv") String cvv, 
+            @JsonProperty("maxLimit") String limit, 
+            @JsonProperty("availableLimit") String availableLimit, 
+            @JsonProperty("paymentDay") int paymentDay, 
+            @JsonProperty("expirationDate") String expirationDate) {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("MM/yyyy");
+        YearMonth date = YearMonth.parse(expirationDate, format);
         LocalDate expiration = date.atEndOfMonth();
         
         this.cardName = cardName;
