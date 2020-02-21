@@ -44,8 +44,8 @@ public class TonwalletApplication {
                     "1.0",
                     "Free to Use",
                     new springfox.documentation.service.Contact("Igor Amaral", "https://www.github.com/igoramaral", ""),
-                    "API license",
-                    "",
+                    "API Git Repository",
+                    "https://www.github.com/igoramaral/TonsWallet",
                     Collections.emptyList());
         }
 }
